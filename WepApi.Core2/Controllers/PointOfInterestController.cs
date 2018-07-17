@@ -23,7 +23,7 @@ namespace WepApi.Core2.Controllers
             return Ok(city.pointofInterest);
         }
 
-        [HttpGet("{cityId}/PoindOfInterest/{id}")]
+        [HttpGet("{cityId}/PoindOfInterest/{id}",Name = "getPoindOfInterest")]
         public IActionResult getPoindOfInterest(int cityId,int id)
         {
             var city = CitiesDataStore.current.Cities.FirstOrDefault(c => c.Id == cityId);
@@ -40,12 +40,16 @@ namespace WepApi.Core2.Controllers
             return Ok(city.pointofInterest);
         }
        
-        [HttpPost("{{cityId}/PoindOfInterest/}")]
+        [HttpPost("{cityId}/PoindOfInterest")]
         public IActionResult CreatePointOfInterest(int cityId,[FromBody] PointOfInterestCreationDTO pointofInterest)
-        {
+         {
             if (pointofInterest == null)
             {
                 return BadRequest();
+            }
+            if (!ModelState.IsValid)
+            {
+                return NotFound();
             }
             var city = CitiesDataStore.current.Cities.FirstOrDefault(c => c.Id == cityId);
 
@@ -57,13 +61,14 @@ namespace WepApi.Core2.Controllers
 
             var finalPointOfDTO = new PointOfInterestDTO()
             {
-                Id = ++MaxPoindOfInterestId,
+                Id = ++MaxPoindOfInterestId ,
                 Name= pointofInterest.Name,
                 Description = pointofInterest.Description
 
             };
             city.pointofInterest.Add(finalPointOfDTO);
-            return Ok(); 
+             return CreatedAtRoute("getPoindOfInterest", new { cityId = cityId , id = finalPointOfDTO.Id}); 
+            //return Ok();
         }
     }
 }
